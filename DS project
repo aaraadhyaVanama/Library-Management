@@ -11,7 +11,7 @@ public:
     
     Book(string t, string a, string d) : title(t), author(a), division(d) {}
 };
-void searchBook(const vector<Book>& books, const string& keyword) {
+void searchhook(const vector<Book>& books, const string& keyword) {
     bool found = false;
     cout << "Searching for books matching: " << keyword << endl;
     for (const auto& book : books) {

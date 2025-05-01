@@ -1,118 +1,46 @@
 #include <iostream>
-#include <string> h
 #include <vector>
+#include <string>
 using namespace std;
-
-// Genre Node class
-class GenreNode {
+class Book {
 public:
-    string genreName;
-    vector<string> books; // Stores up to 5 books
-    GenreNode* left;  // Left child
-    GenreNode* right; // Right child
-
-    GenreNode(string name) {
-        genreName = name;
-        left = NULL;
-        right = NULL;
-    }
+    string title;
+    string author;
+    string division;
+    
+    
+    Book(string t, string a, string d) : title(t), author(a), division(d) {}
 };
-
-// Library Tree class
-class LibraryTree {
-private:
-    GenreNode* root;
-
-    // Helper function to find a genre
-    GenreNode* findGenre(GenreNode* node, string genreName) {
-        if (node == NULL || node->genreName == genreName) {
-            return node;
-        }
-        if (genreName < node->genreName) {
-            return findGenre(node->left, genreName);
-        } else {
-            return findGenre(node->right, genreName);
+void searchBook(const vector<Book>& books, const string& keyword) {
+    bool found = false;
+    cout << "Searching for books matching: " << keyword << endl;
+    for (const auto& book : books) {
+        // Check if the keyword is present in the title or author
+        if (book.title.find(keyword) != string::npos || book.author.find(keyword) != string::npos) {
+            cout << "Title: " << book.title << ", Author: " << book.author 
+                 << ", Division: " << book.division << endl;
+            found = true;
         }
     }
 
-    // Helper function for in-order traversal
-    void traverse(GenreNode* node) {
-        if (node != NULL) {
-            traverse(node->left);
-            cout << "Genre: " << node->genreName << ", Books: ";
-            for (size_t i = 0; i < node->books.size(); i++) {
-                cout << node->books[i] << " ";
-            }
-            cout << endl;
-            traverse(node->right);
-        }
+    if (!found) {
+        cout << "No books found matching the keyword." << endl;
     }
+}
 
-public:
-    LibraryTree() {
-        root = NULL;
-    }
-
-    // Add a genre
-    void addGenre(string genreName) {
-        GenreNode* newNode = new GenreNode(genreName);
-        if (root == NULL) {
-            root = newNode;
-        } else {
-            GenreNode* current = root;
-            while (true) {
-                if (genreName < current->genreName) {
-                    if (current->left == NULL) {
-                        current->left = newNode;
-                        break;
-                    } else {
-                        current = current->left;
-                    }
-                } else {
-                    if (current->right == NULL) {
-                        current->right = newNode;
-                        break;
-                    } else {
-                        current = current->right;
-                    }
-                }
-            }
-        }
-    }
-
-    // Add a book to a genre
-    void addBook(string genreName, string bookTitle) {
-        GenreNode* genreNode = findGenre(root, genreName);
-        if (genreNode != NULL && genreNode->books.size() < 5) {
-            genreNode->books.push_back(bookTitle);
-        } else if (genreNode == NULL) {
-            cout << "Genre not found!" << endl;
-        } else {
-            cout << "Book limit reached for genre: " << genreName << endl;
-        }
-    }
-
-    // Display all genres and books
-    void displayLibrary() {
-        traverse(root);
-    }
-};
-
-// Example usage
 int main() {
-    LibraryTree library;
+    vector<Book> library = {
+        {"DATA STRUCTURES AND ALGORITHMS", "Narasimha Karumanchi", "IT"},
+        {"BASIC ELECTRICAL ENGINEERING", "Rohit Mehta", "EEE"},
+        {"Rich Dad Poor Dad", "Robert Kiyosaki", "ENGLISH"},
+        {"Physics Fundamentals", "Richard Feynman", "PHYSICS"},
+        {"Engineering Chemistry", "R.P. Singh", "CHEMISTRY"}
+    };
 
-    library.addGenre("Fiction");
-    library.addGenre("Mystery");
-    library.addGenre("Fantasy");
-
-    library.addBook("Fiction", "To Kill a Mockingbird");
-    library.addBook("Fiction", "1984");
-    library.addBook("Mystery", "Sherlock Holmes");
-    library.addBook("Fantasy", "Harry Potter");
-
-    cout << "Library contents:" << endl;
-    library.displayLibrary();
+    string keyword;
+    cout << "Enter book title or author to search: ";
+    getline(cin, keyword);
+    searchBook(library, keyword);
 
     return 0;
 }

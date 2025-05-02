@@ -1,46 +1,79 @@
 #include <iostream>
-#include <vector>
 #include <string>
 using namespace std;
-class Book {
+
+
+class BookNode {
 public:
-    string title;
-    string author;
-    string division;
-    
-    
-    Book(string t, string a, string d) : title(t), author(a), division(d) {}
+    string title, url;
+    BookNode* left, *right;
+    BookNode(string t, string u) : title(t), url(u), left(NULL), right(NULL) {}
 };
-void searchhook(const vector<Book>& books, const string& keyword) {
-    bool found = false;
-    cout << "Searching for books matching: " << keyword << endl;
-    for (const auto& book : books) {
-        // Check if the keyword is present in the title or author
-        if (book.title.find(keyword) != string::npos || book.author.find(keyword) != string::npos) {
-            cout << "Title: " << book.title << ", Author: " << book.author 
-                 << ", Division: " << book.division << endl;
-            found = true;
+
+
+class GenreNode {
+public:
+    string name;
+    BookNode* books[5] = {NULL}; 
+    GenreNode* left, *right;
+    GenreNode(string n) : name(n), left(NULL), right(NULL) {}
+};
+
+
+class Library {
+private:
+    GenreNode* root = NULL; 
+
+    GenreNode* insertGenre(GenreNode* node, string name) { 
+        if (!node) return new GenreNode(name);
+        return name < node->name ? node->left = insertGenre(node->left, name) : node->right = insertGenre(node->right, name);
+    }
+
+    void addBookToGenre(GenreNode* node, string genre, string title, string url) { 
+        if (!node) return;
+        if (node->name == genre) for (int i = 0; i < 5; i++) if (!node->books[i]) { node->books[i] = new BookNode(title, url); return; }
+        addBookToGenre(title < node->name ? node->left : node->right, genre, title, url);
+    }
+
+    bool searchBook(GenreNode* node, string title) { 
+        if (!node) return false;
+        for (BookNode* book : node->books) if (book && book->title == title) {
+            cout << "? Book found in genre: " << node->name << "\nVisit website? (yes/no): ";
+            string choice; cin >> choice;
+            if (choice == "yes") system(("start " + book->url).c_str());
+            return true;
+        }
+        return searchBook(title < node->name ? node->left : node->right, title);
+    }
+
+public:
+    Library() {
+        root = insertGenre(root, "Fiction");
+        root = insertGenre(root, "Mystery");
+        root = insertGenre(root, "Fantasy");
+
+        addBookToGenre(root, "Fiction", "To Kill a Mockingbird", "https://en.wikipedia.org/wiki/To_Kill_a_Mockingbird");
+        addBookToGenre(root, "Fiction", "1984", "https://en.wikipedia.org/wiki/Nineteen_Eighty-Four");
+        addBookToGenre(root, "Mystery", "Sherlock Holmes", "https://en.wikipedia.org/wiki/Sherlock_Holmes");
+        addBookToGenre(root, "Fantasy", "Harry Potter", "https://en.wikipedia.org/wiki/Harry_Potter");
+    }
+
+    void search() { 
+        string title;
+        while (true) {
+            cout << "\n?? Enter book title (or type 'exit' to quit): ";
+            cin.ignore(); getline(cin, title);
+            if (title == "exit") { cout << "?? Exiting Library ??\n"; break; }
+            if (!searchBook(root, title)) cout << "? Book not found!\n";
         }
     }
-
-    if (!found) {
-        cout << "No books found matching the keyword." << endl;
-    }
-}
+};
 
 int main() {
-    vector<Book> library = {
-        {"DATA STRUCTURES AND ALGORITHMS", "Narasimha Karumanchi", "IT"},
-        {"BASIC ELECTRICAL ENGINEERING", "Rohit Mehta", "EEE"},
-        {"Rich Dad Poor Dad", "Robert Kiyosaki", "ENGLISH"},
-        {"Physics Fundamentals", "Richard Feynman", "PHYSICS"},
-        {"Engineering Chemistry", "R.P. Singh", "CHEMISTRY"}
-    };
+    cout << "?? Welcome! Do you wish to enter the library? (yes/no): ";
+    string choice; cin >> choice;
+    if (choice != "yes") return cout << "Goodbye! ??\n", 0;
 
-    string keyword;
-    cout << "Enter book title or author to search: ";
-    getline(cin, keyword);
-    searchBook(library, keyword);
-
-    return 0;
+    Library library;
+    library.search();
 }
